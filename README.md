@@ -5,10 +5,10 @@ A simple AddOn for OctoWoW that lets you reposition the tooltip.
 <img src="https://raw.githubusercontent.com/MalcolmDahling/MoveTooltip/refs/heads/main/screenshot.png"></img>
 <br/>
 <br/>
-/mt OR /movetooltip - Show commands.
+<strong>/mt</strong> OR <strong>/movetooltip</strong> - Show commands.
 <br/>
-/mt unlock OR /movetooltip unlock - Show and unlock the draggable anchor.
+<strong>/mt</strong> unlock OR <strong>/movetooltip</strong> unlock - Show and unlock the draggable anchor.
 <br/>
-/mt lock OR /movetooltip lock - Hide and lock the anchor in place.
+<strong>/mt</strong> lock OR <strong>/movetooltip</strong> lock - Hide and lock the anchor in place.
 <br/>
-/mt reset OR /movetooltip reset - Reset the anchor to the default position.
+<strong>/mt</strong> reset OR <strong>/movetooltip</strong> reset - Reset the anchor to the default position.
