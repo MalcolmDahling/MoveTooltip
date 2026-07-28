@@ -1,0 +1,8 @@
+## Interface: 11200
+## Title: Move Tooltip for OctoWoW
+## Notes: Drag an anchor to reposition the game tooltip. Use /mt or /movetooltip to see commands. Position saves account-wide.
+## Author: Claude AI
+## Version: 1.0
+## SavedVariables: MoveTooltipDB
+
+MoveTooltip.lua
