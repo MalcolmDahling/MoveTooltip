@@ -110,8 +110,14 @@ local function MoveTooltip_IsBankItem(owner)
     if not owner or not owner.GetName then
         return false
     end
+
     local name = owner:GetName()
-    return name ~= nil and string.find(name, "^BankFrameItem%d+$") ~= nil
+
+    return name and (
+        string.find(name, "^BankFrameItem%d+$") or
+        string.find(name, "^BagnonItem%d+$") or
+        string.find(name, "^BanknonItem%d+$")
+    )
 end
 
 -- bypassAnchor tracks whether the tooltip currently being shown should be
