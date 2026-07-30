@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Move Tooltip
 ## Notes: Drag an anchor to reposition the game tooltip. Use /mt or /movetooltip to see commands. Position saves account-wide.
-## Author: Claude AI
+## Author: Claude AI and ChatGPT
 ## Version: 1.0
 ## SavedVariables: MoveTooltipDB
 
