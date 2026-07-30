@@ -85,23 +85,86 @@ label:SetText("Tooltip Anchor")
 -- attach a second anchor point: every SetPoint call gets redirected to
 -- a single point on our anchor. The tooltip still sizes itself normally
 -- from its own content - only its position is fixed.
+--
+-- Bag/bank item slots are the one exception: when the tooltip's owner is
+-- a bag or bank item button, we skip our override entirely and let both
+-- SetOwner and SetPoint behave exactly as Blizzard intended, so those
+-- tooltips keep their normal default position and wrapping.
 
 local Orig_SetOwner = GameTooltip.SetOwner
 local Orig_SetPoint = GameTooltip.SetPoint
+local Orig_SetBagItem = GameTooltip.SetBagItem
+local Orig_Show = GameTooltip.Show
 
 local function MoveTooltip_Anchor(self)
+    -- Pinning the tooltip's BOTTOMRIGHT corner to the anchor means the
+    -- tooltip expands upward and to the left as lines are added, instead
+    -- of the default downward-and-to-the-right growth.
     Orig_SetPoint(self, "BOTTOMRIGHT", MoveTooltipAnchor, "BOTTOMRIGHT", 0, 0)
 end
 
+-- Main bank slots (the 24-28 non-bag slots in the bank frame) are backed by
+-- frames literally named BankFrameItem1, BankFrameItem2, etc, so a simple
+-- name check catches those immediately, before anything else happens.
+local function MoveTooltip_IsBankItem(owner)
+    if not owner or not owner.GetName then
+        return false
+    end
+    local name = owner:GetName()
+    return name ~= nil and string.find(name, "^BankFrameItem%d+$") ~= nil
+end
+
+-- bypassAnchor tracks whether the tooltip currently being shown should be
+-- left completely alone (bag/bank item) instead of pinned to our anchor.
+-- Bank slots are known immediately via the name check. Regular bag slots
+-- aren't known until SetBagItem actually fires, so we don't touch position
+-- at all in SetOwner - only SetPoint (below) and Show/OnShow ever move the
+-- tooltip, and both check this flag before doing so. That way a bag item's
+-- position is simply never interfered with, at any point, once we know.
+local bypassAnchor = false
+
 GameTooltip.SetOwner = function(self, owner, anchorType)
+    bypassAnchor = MoveTooltip_IsBankItem(owner)
     Orig_SetOwner(self, owner, anchorType)
-    MoveTooltip_Anchor(self)
 end
 
 GameTooltip.SetPoint = function(self, ...)
-    -- Ignore whatever point the caller asked for; always pin to our anchor.
-    MoveTooltip_Anchor(self)
+    if bypassAnchor then
+        -- Bag/bank item tooltip - let this positioning call through untouched.
+        Orig_SetPoint(self, unpack(arg, 1, arg.n))
+    else
+        -- Ignore whatever point the caller asked for; always pin to our anchor.
+        MoveTooltip_Anchor(self)
+    end
 end
+
+GameTooltip.SetBagItem = function(self, ...)
+    bypassAnchor = true
+    Orig_SetBagItem(self, unpack(arg, 1, arg.n))
+end
+
+local function MoveTooltip_ApplyAnchorIfNeeded()
+    if not bypassAnchor then
+        MoveTooltip_Anchor(GameTooltip)
+    end
+end
+
+-- Cover both ways a tooltip can become visible: an explicit :Show() call,
+-- and the OnShow script event (which fires whenever the frame's shown
+-- state actually flips to true, even for tooltips that never go through
+-- the :Show() method directly - this is what action bar tooltips need).
+GameTooltip.Show = function(self)
+    MoveTooltip_ApplyAnchorIfNeeded()
+    Orig_Show(self)
+end
+
+local existingOnShow = GameTooltip:GetScript("OnShow")
+GameTooltip:SetScript("OnShow", function()
+    MoveTooltip_ApplyAnchorIfNeeded()
+    if existingOnShow then
+        existingOnShow()
+    end
+end)
 
 -- ---------------------------------------------------------------------
 -- Lock / unlock / reset
@@ -118,7 +181,7 @@ local function MoveTooltip_Unlock()
     MoveTooltipDB.locked = false
     anchor:EnableMouse(true)
     anchor:Show()
-    DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99MoveTooltip|r: unlocked - drag the box to reposition the tooltip, then /tam lock when done.")
+    DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99MoveTooltip|r: unlocked - drag the box to reposition the tooltip, then /mt lock when done.")
 end
 
 local function MoveTooltip_Reset()
