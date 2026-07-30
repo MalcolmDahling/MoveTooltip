@@ -12,3 +12,6 @@ A simple AddOn for OctoWoW that lets you reposition the tooltip.
 <strong>/mt lock</strong> or <strong>/movetooltip lock</strong> - Hide and lock the anchor in place.
 <br/>
 <strong>/mt reset</strong> or <strong>/movetooltip reset</strong> - Reset the anchor to the default position.
+<br/>
+<br/>
+The AddOn has been tested in OctoWoW with vanilla bags and with Bagnon (https://github.com/McPewPew/Bagnon)
